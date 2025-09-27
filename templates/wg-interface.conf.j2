@@ -21,7 +21,7 @@ ListenPort = {{ wireguard_listen_port }}
 {% if peer.name is defined %}# {{ peer.name }}
 {% endif %}
 [Peer]
-AllowedIPs = {{ peer.allowed_ips }}
+AllowedIPs = {{ ", ".join(peer.allowed_ips) if peer.allowed_ips is iterable and peer.allowed_ips is not string else peer.allowed_ips }}
 PublicKey = {{ peer.public_key }}
 {% if peer.psk is defined %}PresharedKey = {{ peer.psk }}
 {% endif %}
