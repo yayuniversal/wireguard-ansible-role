@@ -1,23 +1,23 @@
-{% macro multi_param(param_name, values) -%}
+{% macro multivalues(param_name, values) -%}
 {%- for value in values -%}
 {{ param_name }} = {{ value }}
 {% endfor %}
 {%- endmacro -%}
 
 [Interface]
-Address = {{ wireguard_ip_address }}
-PrivateKey = {{ wireguard_private_key }}
-ListenPort = {{ wireguard_listen_port }}
-{% if wireguard_dns %}DNS = {{ wireguard_dns }}
+Address = {{ wg_interface.ip_address }}
+PrivateKey = {{ _wireguard_private_key }}
+ListenPort = {{ wg_interface.listen_port }}
+{% if wg_interface.dns %}DNS = {{ wg_interface.dns }}
 {% endif %}
-{% if wireguard_mtu %}MTU = {{ wireguard_mtu }}
+{% if wg_interface.mtu %}MTU = {{ wg_interface.mtu }}
 {% endif %}
-{{ multi_param("PreUp", wireguard_preup_list) -}}
-{{ multi_param("PostUp", wireguard_postup_list) -}}
-{{ multi_param("PreDown", wireguard_predown_list) -}}
-{{ multi_param("PostDown", wireguard_postdown_list)  }}
+{{ multivalues("PreUp", wg_interface.preup | enforce_list) -}}
+{{ multivalues("PostUp", wg_interface.postup | enforce_list) -}}
+{{ multivalues("PreDown", wg_interface.predown | enforce_list) -}}
+{{ multivalues("PostDown", wg_interface.postdown | enforce_list)  }}
 
-{% for peer in wireguard_peers %}
+{% for peer in wg_interface.peers %}
 {% if peer.name is defined %}# {{ peer.name }}
 {% endif %}
 [Peer]

@@ -1,6 +1,6 @@
 galaxy_info:
   author: Lilian Mallardeau
-  description: Installs WireGuard and configures a WireGuard interface
+  description: Installs WireGuard and configures WireGuard interfaces
   license: MIT
 
   min_ansible_version: 2.1

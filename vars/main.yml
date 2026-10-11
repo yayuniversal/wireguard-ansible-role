@@ -1,5 +1,13 @@
 ---
-wireguard_preup_list: "{{ [] if wireguard_preup is none else (wireguard_preup is iterable and wireguard_preup is not string | ternary(wireguard_preup, [wireguard_preup])) }}"
-wireguard_postup_list: "{{ [] if wireguard_postup is none else (wireguard_postup is iterable and wireguard_postup is not string | ternary(wireguard_postup, [wireguard_postup])) }}"
-wireguard_predown_list: "{{ [] if wireguard_predown is none else (wireguard_predown is iterable and wireguard_predown is not string | ternary(wireguard_predown, [wireguard_predown])) }}"
-wireguard_postdown_list: "{{ [] if wireguard_postdown is none else (wireguard_postdown is iterable and wireguard_postdown is not string | ternary(wireguard_postdown, [wireguard_postdown])) }}"
+wireguard_interface_defaults:
+  private_key: ""
+  private_key_path: /etc/wireguard/{{ wireguard_interface.name }}.key
+  ip_address:
+  listen_port: 51820
+  dns:
+  mtu:
+  preup:
+  postup:
+  predown:
+  postdown:
+  peers: []

@@ -1,0 +1,63 @@
+---
+- block:
+    - name: Check if private key file exists
+      stat:
+        path: "{{ wg_interface.private_key_path }}"
+      register: _wireguard_private_key_file
+
+    - name: Read private key
+      command: cat {{ wg_interface.private_key_path }}
+      register: private_key
+      changed_when: false
+      when: _wireguard_private_key_file.stat.exists
+
+    - name: Generate a new private key
+      command: wg genkey
+      register: new_private_key
+      when: not _wireguard_private_key_file.stat.exists
+  when: wg_interface.private_key | length == 0
+
+- name: Set _wireguard_private_key
+  set_fact:
+    _wireguard_private_key: >-
+      {{ (wg_interface.private_key | length > 0) |
+        ternary(wg_interface.private_key, _wireguard_private_key_file.stat.exists |
+          ternary(private_key.stdout, new_private_key.stdout) ) }}
+
+- name: Write private key to {{ wg_interface.private_key_path }}
+  copy:
+    content: "{{ _wireguard_private_key }}"
+    dest: "{{ wg_interface.private_key_path }}"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Copy interface configuration file to /etc/wireguard/{{ wg_interface.name }}.conf
+  template:
+    src: wg-interface.conf.j2
+    dest: /etc/wireguard/{{ wg_interface.name }}.conf
+    owner: root
+    group: root
+    mode: 0600
+  register: _wireguard_interface_config
+
+- name: Enable interface {{ wg_interface.name }} with wg-quick
+  service:
+    name: wg-quick@{{ wg_interface.name }}
+    state: started
+    enabled: yes
+
+- name: Reload wireguard interface config
+  service:
+    name: wg-quick@{{ wg_interface.name }}
+    state: reloaded
+  when: _wireguard_interface_config.changed
+
+- name: Generate public key from private key
+  shell: wg pubkey < "{{ wg_interface.private_key_path }}"
+  changed_when: false
+  register: wireguard_public_key
+
+- name: Print public key
+  debug:
+    msg: "WireGuard public key for interface {{ wg_interface.name }}: {{ wireguard_public_key.stdout }}"

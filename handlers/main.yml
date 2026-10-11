@@ -1,5 +1,0 @@
----
-- name: reload wireguard interface
-  service:
-    name: wg-quick@{{ wireguard_interface_name }}
-    state: reloaded
